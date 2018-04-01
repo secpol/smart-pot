@@ -1,0 +1,5 @@
+{
+  "intType": 1520,
+  "longType": 2016010101,
+  "stringType": "Hello World"
+}
