@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>IGP Test Page</title>
+	<script>
+		function ajaxSubmit()
+{
+  var xmlhttp;
+  xmlhttp=new XMLHttpRequest();
+  xmlhttp.open("POST","http://localhost:3035/post",true);
+  xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+  xmlhttp.send("arg1=AjaxTest&arg2=AjaxTest&arg3=AjaxTest&arg4=AjaxTest&arg5=AjaxTest&arg6=AjaxTest&arg7=AjaxTest");
+}
+	</script>
+</head>
+<body style="text-align: center;">
+	<h1 style="text-align: left;">Test Page</h1>
+	<hr>
+<form style="line-height: 200%;text-align: center;" action="http://localhost:3035/post" method="post">
+	<label>arg1&nbsp;&nbsp;</label><input type="text" name="arg1" value="test"><br>
+	<label>arg2&nbsp;&nbsp;</label><input type="text" name="arg2" value="test"><br>
+	<label>arg3&nbsp;&nbsp;</label><input type="text" name="arg3" value="test"><br>
+	<label>arg4&nbsp;&nbsp;</label><input type="text" name="arg4" value="test"><br>
+	<label>arg5&nbsp;&nbsp;</label><input type="text" name="arg5" value="test"><br>
+	<label>arg6&nbsp;&nbsp;</label><input type="text" name="arg6" value="test"><br>
+	<label>arg7&nbsp;&nbsp;</label><input type="text" name="arg7" value="test"><br>
+	<input type="submit" value="Submit">
+</form>
+	<hr>
+		<textarea style="width: 40%;height: 200px;text-align: left;background-color: grey;word-wrap: break-word;border-radius: 5px;padding: 10px 10px 10px 10px">
+function ajaxSubmit()
+{
+  var xmlhttp;
+  xmlhttp=new XMLHttpRequest();
+  xmlhttp.open("POST","http://localhost:3035/post",true);
+  xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+  xmlhttp.send("arg1=AjaxTest&arg2=AjaxTest&arg3=AjaxTest&arg4=AjaxTest...");
+}
+		</textarea>
+		<br>
+	<input type="button" value="AJAXSUBMIT" onclick="ajaxSubmit()">
+</body>
+</html>

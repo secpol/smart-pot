@@ -1,5 +1,6 @@
 /**
  * @author Dell
+ * nodeJS version: v8.9.3
  *
  * 考虑到我们的硬件还没有完成，并且我们希望加快进度，于是就有了这段代码。
  * 这段代码运行于NodeJS，当访问localhost:3035/log/YYYYMMDD时，返回一个JSON。
@@ -23,10 +24,22 @@
  * 		...
  * 	]}
  *
+ *
+ *
+ * 2018年4月2日更新：
+ * 这里写一个备用计划。如果昨天上传的硬件代码不工作并且时间很紧迫，我们就可以使用它。
+ * 实际上，我认为直接用POST方法提交带有设置参数的表单可能更加方便，而不是直接透过文件服务器上传一个设置文件。
+ * 当然，直接上传配置文件的方法也很好 ;D
+ *
+ *
+ * 为了方便调试，我随便写了一个网页用于表单提交。
+ * 
  */
 
 
 var http = require("http");
+var querystring = require("querystring");
+var fs = require("fs");
 
 http.createServer(function (req, res) {
     /**
@@ -35,34 +48,58 @@ http.createServer(function (req, res) {
     * AND send false JSON
     */
     if (req.url.substr(0, 5) == "/log/") {
+        console.log(" /log/   Accessed!");
         if (/^([12]\d{3})(0\d|1[0-2])([0-2]\d|3[01])$/.test(req.url.substr(5))) {
             res.writeHead(200, {"Content-Type": "application/json"});
             res.write(randomData(req.url.substr(5)));
             res.end();
         }
         else {
-            res.writeHead(404, {"Content-Type": "text/html"});
-            res.end("<h1>404</h1>");
+            console.log("Not YYYYMMDD!");
+            res.writeHead(404, {"Content-Type": "text/plain"});
+            res.end("404");
         }
     }
     /**
      * 模拟接受表单
      */
     else if (req.url == "/post" && req.method.toLowerCase() == "post") {
+        console.log("/post   Accessed!");
         var dataReceive = "";
         req.addListener("data", function (chunk) {
             dataReceive += chunk;
         });
-
+/**
+ * 接受表单完成后构造JSON
+ */
         req.addListener("end", function () {
-            console.log(dataReceive.toString());
-            res.writeHead(200, {"Content-Type": "text/html"});
-            res.end("<h1>OK</h1>");
+            var settingJSON="\{";
+            for (var i = 0; i < Object.keys(querystring.parse(dataReceive.toString())).length; i++) {
+                settingJSON += "\""+Object.keys(querystring.parse(dataReceive.toString()))[i]+"\"\:\""+
+                                Object.values(querystring.parse(dataReceive.toString()))[i]+"\""
+                if(i<Object.keys(querystring.parse(dataReceive.toString())).length-1){
+                    settingJSON+=",\n"
+                }
+            }
+            settingJSON+="\}";
+            console.log("\n"+settingJSON+"\n");
+/**
+ * 写入JSON设置文件
+ */
+
+            fs.writeFile('./SDroot/smart-pot/settings.txt', settingJSON,  function(err) {
+               if (err) {
+                   return console.error(err);
+                }
+            });
+            console.log("settingJSON.txt    Write OK!");
+            res.writeHead(200, {"Content-Type": "text/plain"});
+            res.end("OK");
         })
     }
     else {
-        res.writeHead(404, {"Content-Type": "text/html"});
-        res.end("<h1>404</h1>");
+        res.writeHead(404, {"Content-Type": "text/plain"});
+        res.end("404");
     }
 }).listen(3035, "localhost");
 
