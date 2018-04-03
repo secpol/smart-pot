@@ -1,8 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
-//#include <DNSServer.h>
-//#include "WiFiManager.h"
 #include <SPI.h>
 #include <SD.h>
 #include <DHT.h>
@@ -13,9 +11,11 @@ const char* ssid = "......"; //your AP ssid
 const char* password = "......"; //your AP pass
 const char* serverIndex = "<form method='POST' action='/upload' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>"; //form that show up when browsing website
 static bool hasSD = false;
+int set[3],i=0;
 
 ESP8266WebServer server(80);
 File uploadFile;
+File conf;
 
 void handleFileUpload(){
   if(server.uri() != "/upload") return; //if not equal to
@@ -33,6 +33,9 @@ void handleFileUpload(){
     if(uploadFile) uploadFile.close();
     DEBUG.print("Upload: END, Size: "); 
     DEBUG.println(upload.totalSize);
+    if (SD.exists("CONF.INI")) {
+      ESP.restart(); // everytime we upload a CONF.INI file device will restart and load new configuration into memory
+    }
   }
 }
 
@@ -44,6 +47,8 @@ void setup(void)
      DEBUG.println("SD Card initialized.");
      hasSD = true;
   }
+  
+  File conf = SD.open("CONF.INI"); //open configuration file
 
   DEBUG.setDebugOutput(true);
   DEBUG.print("\n");
@@ -69,7 +74,22 @@ void setup(void)
     });
     server.begin();
   }
-  
+if (conf)
+  {
+    while (conf.available())
+    { 
+      //create array from file
+      for(i=0;i<3;i++) 
+      {
+        set[i]=conf.parseInt();
+      }
+    }
+    conf.close();
+  } else {
+    Serial.println("Cannot open file!");
+  }
+
+  Serial.println(set[1]); //print output for debugging purposes
 }
 
 void loop(void) {
