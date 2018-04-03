@@ -1,3 +1,5 @@
+// This code will be systematically developed, so finally we can use it to program our ESPs.
+
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
