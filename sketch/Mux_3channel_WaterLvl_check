@@ -1,7 +1,7 @@
 // Author Bartek Zuranski
 // Measurring water level with analog MUX channels, I'm using 3 with 4051, can be used as many chanells as on your Mux. 
 // Design is as simple as possible, if water drops wire on Mux channel loses ground and trigers alarm.
-// Script design in 3 blocks, Mux read, waterLvl check, and analog summarized read for improved accuracy.  
+// Script design in 3 blocks, Mux read, waterLvl check, and analog summarized read for improved accuracy, this is used with pre-read and 10nF cap.  
 
 
 // storage for Value of MuX Channels:
