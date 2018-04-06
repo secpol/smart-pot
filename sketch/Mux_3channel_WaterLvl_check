@@ -47,15 +47,15 @@ int readH2O(){
 
 int h2oCheck(){
    if(a < 10200){
-    Serial.println("Full");
+    Serial.println("Full");  // replace debug with return full
    }else{
     if(b < 10200){
-      Serial.println("Half");
+      Serial.println("Half");   // return half
     }else{
       if(c < 10200){
-        Serial.println("Low");  
+        Serial.println("Low");  // return low
       }else{
-        Serial.println("EMPTY");
+        Serial.println("EMPTY");  // return empty
       }
     }
    }
