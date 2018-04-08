@@ -57,7 +57,7 @@ void setup() {
   }
   setupAP();
 }
-
+ 
 bool testWifi(void) {
   int c = 0;
   DEBUG.println("Wait...");  
