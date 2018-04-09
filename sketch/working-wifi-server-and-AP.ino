@@ -1,17 +1,3 @@
-/*
-
-This is the code which will be used to control Device using an App.
-To run that code all you need is properly wired ESP.
-
-1. Connect your phone to ESP Access Point, credentials are in the code,
-2. On your phone browse to:
-    192.168.4.1/settings?ssid="local_wifi_ssid"&pass="local_wifi_password" 
-    hit Go, wait 5s.
-3. Browse to 192.168.4.1 on your phone to get Local IP.
-4. To reset settings go to either AP IP or local IP and append following /cleareeprom , hit Go or enter.
-
-*/
-
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
@@ -20,8 +6,8 @@ To run that code all you need is properly wired ESP.
 
 ESP8266WebServer server(80);
 
-const char* ssid = "smartpot02";  //AP ssid
-const char* passphrase = "napier01";  //AP password
+const char* ssid = "smartpot02";
+const char* passphrase = "napier01";
 String st;
 String content;
 int statusCode;
@@ -33,7 +19,7 @@ void setup() {
   DEBUG.println();
   DEBUG.println();
   DEBUG.println("Startup");
-  // read ssid and pass from eeprom
+  // read eeprom for ssid and pass
   DEBUG.println("Reading EEPROM SSID");
   String esid;
   for (int i = 0; i < 32; ++i)
@@ -59,7 +45,7 @@ void setup() {
   }
   setupAP();
 }
- 
+
 bool testWifi(void) {
   int c = 0;
   DEBUG.println("Wait...");  
@@ -139,28 +125,28 @@ void createWebServer(int webtype)
   if ( webtype == 1 ) {
     server.on("/", []() {
     IPAddress ip = WiFi.softAPIP();
-    String page = "";
-    page += ("{\"Chip ID\":\"");
-    page += ESP.getChipId();
-    page += ("\"\n\n");
-    page += ("\"Flash Chip ID\":\"");
-    page += ESP.getFlashChipId();
-    page += ("\"\n\n");
-    page += ("\"IDE Flash Size\":\"");
-    page += ESP.getFlashChipSize();
-    page += ("\"\n\n");
-    page += ("\"Real Flash Size\":\"");
-    page += ESP.getFlashChipRealSize();
-    page += ("\"\n\n");
-    page += ("\"Soft AP IP\":\"");
+    String page = "{";
+    page += ("\"Soft AP IP\":\[\"");
     page += WiFi.softAPIP().toString();
-    page += ("\"\n\n");
-    page += ("\"Soft AP MAC\":\"");
+    page += ("\"\]\,\n\n");
+    page += ("\"Chip ID\":\[\"");
+    page += ESP.getChipId();
+    page += ("\"\]\,\n\n");
+    page += ("\"Flash Chip ID\":\[\"");
+    page += ESP.getFlashChipId();
+    page += ("\"\]\,\n\n");
+    page += ("\"IDE Flash Size\":\[\"");
+    page += ESP.getFlashChipSize();
+    page += ("\"\]\,\n\n");
+    page += ("\"Real Flash Size\":\[\"");
+    page += ESP.getFlashChipRealSize();
+    page += ("\"\]\,\n\n");
+    page += ("\"Soft AP MAC\":\[\"");
     page += WiFi.softAPmacAddress();
-    page += ("\"\n\n");
-    page += ("\"Station MAC\":\"");
+    page += ("\"\]\,\n\n");
+    page += ("\"Station MAC\":\[\"");
     page += WiFi.macAddress();
-    page += ("\"}\n\n");
+    page += ("\"]}");
     server.send(200, "application/json", page);
     });
     server.on("/settings", []() {
@@ -202,9 +188,37 @@ void createWebServer(int webtype)
     });
   } else if (webtype == 0) {
     server.on("/", []() {
-      IPAddress ip = WiFi.localIP();
-      String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-      server.send(200, "application/json", "{\"IP\":\"" + ipStr + "\"}");
+      //IPAddress ip = WiFi.localIP();
+      //String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
+      //server.send(200, "application/json", "{\"IP\":\"" + ipStr + "\"}");
+      //server.on("/", []() {
+    IPAddress ip = WiFi.softAPIP();
+    String page = "{";
+    page += ("\"Soft AP IP\":\[\"");
+    page += WiFi.softAPIP().toString();
+    page += ("\"\]\,\n\n");
+    page += ("\"Server IP\":\[\"");
+    page += WiFi.localIP().toString();
+    page += ("\"\]\,\n\n");
+    page += ("\"Chip ID\":\[\"");
+    page += ESP.getChipId();
+    page += ("\"\]\,\n\n");
+    page += ("\"Flash Chip ID\":\[\"");
+    page += ESP.getFlashChipId();
+    page += ("\"\]\,\n\n");
+    page += ("\"IDE Flash Size\":\[\"");
+    page += ESP.getFlashChipSize();
+    page += ("\"\]\,\n\n");
+    page += ("\"Real Flash Size\":\[\"");
+    page += ESP.getFlashChipRealSize();
+    page += ("\"\]\,\n\n");
+    page += ("\"Soft AP MAC\":\[\"");
+    page += WiFi.softAPmacAddress();
+    page += ("\"\]\,\n\n");
+    page += ("\"Station MAC\":\[\"");
+    page += WiFi.macAddress();
+    page += ("\"]}");
+    server.send(200, "application/json", page);
     });
     server.on("/cleareeprom", []() {
       content = "<!DOCTYPE HTML>\r\n<html>";
