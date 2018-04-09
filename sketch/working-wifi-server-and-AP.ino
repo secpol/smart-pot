@@ -1,3 +1,15 @@
+/*
+To run that code all you need is properly wired ESP.
+ 
+1. Connect your phone to ESP Access Point, credentials are in the code,
+2. On your phone browse to:
+    192.168.4.1/settings?ssid="local_wifi_ssid"&pass="local_wifi_password" 
+    hit Go, wait 5s.
+ 3. Browse to 192.168.4.1 on your phone to get Local IP.
+ 4. To reset settings go to either AP IP or local IP and append following /cleareeprom , hit Go or enter.
+ 
+*/
+  
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
