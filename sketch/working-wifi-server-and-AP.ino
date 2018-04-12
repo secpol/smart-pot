@@ -13,16 +13,20 @@ To run that code all you need is properly wired ESP.
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
+#include <SPI.h>
+#include <SD.h>
 
 #define DEBUG Serial
 
 ESP8266WebServer server(80);
 
-const char* ssid = "smartpot02";
+const char* ssid = "smartpot01";
 const char* passphrase = "napier01";
+static bool hasSD = false;
 String st;
 String content;
 int statusCode;
+File conf;
 
 void setup() {
   DEBUG.begin(115200);
@@ -135,6 +139,9 @@ void setupAP(void) {
 void createWebServer(int webtype)
 {
   if ( webtype == 1 ) {
+
+    /* Main webpage of the server, displays details about device when device is in AP mode */
+    
     server.on("/", []() {
     IPAddress ip = WiFi.softAPIP();
     String page = "{";
@@ -161,7 +168,10 @@ void createWebServer(int webtype)
     page += ("\"]}");
     server.send(200, "application/json", page);
     });
-    server.on("/settings", []() {
+
+    /* This URL is used to take two specific arguments: SSID and password and ts store them in EEPROM of the device, usage e.g.: x.x.x.x/wifiSetup?ssid=napier5gee&pass=fourwordsalluppercase */
+    
+    server.on("/wifiSetup", []() {
         String qsid = server.arg("ssid");
         String qpass = server.arg("pass");
         if (qsid.length() > 0 && qpass.length() > 0) {
@@ -199,39 +209,75 @@ void createWebServer(int webtype)
         server.send(statusCode, "application/json", content);
     });
   } else if (webtype == 0) {
+    
+    /* Main webpage of the server, displays server Local IP */
+    
     server.on("/", []() {
-      //IPAddress ip = WiFi.localIP();
-      //String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-      //server.send(200, "application/json", "{\"IP\":\"" + ipStr + "\"}");
-      //server.on("/", []() {
-    IPAddress ip = WiFi.softAPIP();
-    String page = "{";
-    page += ("\"Soft AP IP\":\[\"");
-    page += WiFi.softAPIP().toString();
-    page += ("\"\]\,\n\n");
-    page += ("\"Server IP\":\[\"");
-    page += WiFi.localIP().toString();
-    page += ("\"\]\,\n\n");
-    page += ("\"Chip ID\":\[\"");
-    page += ESP.getChipId();
-    page += ("\"\]\,\n\n");
-    page += ("\"Flash Chip ID\":\[\"");
-    page += ESP.getFlashChipId();
-    page += ("\"\]\,\n\n");
-    page += ("\"IDE Flash Size\":\[\"");
-    page += ESP.getFlashChipSize();
-    page += ("\"\]\,\n\n");
-    page += ("\"Real Flash Size\":\[\"");
-    page += ESP.getFlashChipRealSize();
-    page += ("\"\]\,\n\n");
-    page += ("\"Soft AP MAC\":\[\"");
-    page += WiFi.softAPmacAddress();
-    page += ("\"\]\,\n\n");
-    page += ("\"Station MAC\":\[\"");
-    page += WiFi.macAddress();
-    page += ("\"]}");
-    server.send(200, "application/json", page);
+      String page = "{";
+      page += ("\"Server IP\":\[\"");
+      page += WiFi.localIP().toString();
+      page += ("\"]}");
+      server.send(200, "application/json", page);
     });
+    
+    /* This URL is used to display details about the hardware, can be used to distinguish from 2 or more different pots */
+    
+    server.on("/details", []() {
+      String page = "{";
+      page += ("\"Soft AP IP\":\[\"");
+      page += WiFi.softAPIP().toString();
+      page += ("\"\]\,\n\n");
+      page += ("\"Server IP\":\[\"");
+      page += WiFi.localIP().toString();
+      page += ("\"\]\,\n\n");
+      page += ("\"Chip ID\":\[\"");
+      page += ESP.getChipId();
+      page += ("\"\]\,\n\n");
+      page += ("\"Flash Chip ID\":\[\"");
+      page += ESP.getFlashChipId();
+      page += ("\"\]\,\n\n");
+      page += ("\"IDE Flash Size\":\[\"");
+      page += ESP.getFlashChipSize();
+      page += ("\"\]\,\n\n");
+      page += ("\"Real Flash Size\":\[\"");
+      page += ESP.getFlashChipRealSize();
+      page += ("\"\]\,\n\n");
+      page += ("\"Soft AP MAC\":\[\"");
+      page += WiFi.softAPmacAddress();
+      page += ("\"\]\,\n\n");
+      page += ("\"Station MAC\":\[\"");
+      page += WiFi.macAddress();
+      page += ("\"]}");
+      server.send(200, "application/json", page);
+    });
+    
+    /* This URL is used to take any number of arguments and save them to the file, usage e.g.: x.x.x.x/uploadSettings?arg1=1000&arg2=2000 */
+    
+    server.on("/uploadSettings", []() {
+      String message = "";
+      message += server.args();                   //Get number of parameters
+      message += "\n";                            //Add a new line
+      for (int i = 0; i < server.args(); i++) {
+        message += server.arg(i) + "\n";          //Get the value of the parameter
+      }
+      conf = SD.open("config.ini", O_WRITE);
+      if (conf) 
+      {
+        conf.print(message);
+        conf.close();
+      } 
+      else 
+      {
+        DEBUG.println("No file");
+      }
+      //Serial.println(message);
+      //Serial.println(server.arg(1));
+      //Serial.println(server.arg(0));
+      server.send(200, "text/plain", message);    //Response to the HTTP request
+    });
+    
+    /* This URL is used to clear SSID and password from EEPROM memory of the device */
+    
     server.on("/cleareeprom", []() {
       content = "<!DOCTYPE HTML>\r\n<html>";
       content += "<p>Clearing the EEPROM</p></html>";
