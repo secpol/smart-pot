@@ -3,7 +3,7 @@ To run that code all you need is properly wired ESP.
  
 1. Connect your phone to ESP Access Point, credentials are in the code,
 2. On your phone browse to:
-    192.168.4.1/settings?ssid="local_wifi_ssid"&pass="local_wifi_password" 
+    x.x.x.x/wifiSetup?ssid=napier5gee&pass=fourwordsalluppercase 
     hit Go, wait 5s.
  3. Browse to 192.168.4.1 on your phone to get Local IP.
  4. To reset settings go to either AP IP or local IP and append following /cleareeprom , hit Go or enter.
@@ -169,7 +169,8 @@ void createWebServer(int webtype)
     server.send(200, "application/json", page);
     });
 
-    /* This URL is used to take two specific arguments: SSID and password and ts store them in EEPROM of the device, usage e.g.: x.x.x.x/wifiSetup?ssid=napier5gee&pass=fourwordsalluppercase */
+    /* This URL is used to take two specific arguments: SSID and password and store them in EEPROM of the device, 
+       usage e.g.: x.x.x.x/wifiSetup?ssid=napier5gee&pass=fourwordsalluppercase */
     
     server.on("/wifiSetup", []() {
         String qsid = server.arg("ssid");
@@ -251,12 +252,11 @@ void createWebServer(int webtype)
       server.send(200, "application/json", page);
     });
     
-    /* This URL is used to take any number of arguments and save them to the file, usage e.g.: x.x.x.x/uploadSettings?arg1=1000&arg2=2000 */
+    /* This URL is used to take any number of arguments and save them to the file, 
+    usage e.g.: x.x.x.x/uploadSettings?arg1=1000&arg2=2000 */
     
     server.on("/uploadSettings", []() {
       String message = "";
-      message += server.args();                   //Get number of parameters
-      message += "\n";                            //Add a new line
       for (int i = 0; i < server.args(); i++) {
         message += server.arg(i) + "\n";          //Get the value of the parameter
       }
@@ -265,15 +265,13 @@ void createWebServer(int webtype)
       {
         conf.print(message);
         conf.close();
+        server.send(200, "text/plain", message + "Data saved to file.");
       } 
       else 
       {
         DEBUG.println("No file");
+        server.send(200, "text/plain", message + "File corrupt or not exists, data not delivered.");
       }
-      //Serial.println(message);
-      //Serial.println(server.arg(1));
-      //Serial.println(server.arg(0));
-      server.send(200, "text/plain", message);    //Response to the HTTP request
     });
     
     /* This URL is used to clear SSID and password from EEPROM memory of the device */
