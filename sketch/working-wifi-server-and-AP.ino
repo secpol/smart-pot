@@ -59,6 +59,10 @@ void setup() {
         return;
       } 
   }
+  if (SD.begin(SS)){
+    DBG_OUTPUT_PORT.println("SD Card initialized.");
+    hasSD = true;
+  }
   setupAP();
 }
 
