@@ -3,10 +3,10 @@ To run that code all you need is properly wired ESP.
  
 1. Connect your phone to ESP Access Point, credentials are in the code,
 2. On your phone browse to:
-    x.x.x.x/wifiSetup?ssid=napier5gee&pass=fourwordsalluppercase 
+    x.x.x.x/wifiSetup?ssid=napier5gee&pass=fourwordsalluppercase (where ssid and pass are your home access point credentials)
     hit Go, wait 5s.
- 3. Browse to 192.168.4.1 on your phone to get Local IP.
- 4. To reset settings go to either AP IP or local IP and append following /cleareeprom , hit Go or enter.
+ 3. Browse to 192.168.4.1 on your phone to get Local IP, access to server using provided IP.
+ 4. To reset settings browse either AP IP or local IP and append following to IP address: /cleareeprom , hit Go or enter.
  
 */
   
